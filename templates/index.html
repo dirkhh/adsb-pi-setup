@@ -7,29 +7,33 @@
     <div class="form-group">
         <label for="lat">Latitude</label>
         <input type="text" name="lat"
+               required
                placeholder="Antenna latitude" class="form-control"
-               value="{{ request.form['lat'] }}"></input>
+               value="{{ env_values['FEEDER_LAT'] }}"></input>
     </div>
     <div class="form-group">
         <label for="lng">Longitude</label>
         <input type="text" name="lng"
+               required
                placeholder="Antenna longitude" class="form-control"
-               value="{{ request.form['lng'] }}"></input>
+               value="{{ env_values['FEEDER_LONG'] }}"></input>
     </div>
 
     <div class="form-group">
         <label for="alt">Altitude above mean sealevel in meters</label>
         <input type="text" name="alt"
+               required
                placeholder="Antenna MSL altitude (in m)" class="form-control"
-               value="{{ request.form['alt'] }}"></input>
+               value="{{ env_values['FEEDER_ALT_M'] }}"></input>
     </div>
 
     <div class="form-group">
         <label for="tz">Timzone</label>
-<button onclick="sendTimeToServer()">update time</button>
+        <button onclick="sendTimeToServer()">update timezone</button>
         <input type="text" name="form_timezone" id="form_timezone"
-               placeholder={{ browser_timezone }} class="form-control"
-               value="{{ request.form['tz'] }}"></input>
+               required
+               placeholder="populate from the browser timezone by clicking the button above" class="form-control"
+               value="{{ env_values['FEEDER_TZ'] }}"></input>
     </div>
 
 <script>
@@ -44,7 +48,8 @@ function sendTimeToServer(){
 
 
     <div class="form-group">
-        <button type="submit" class="btn btn-primary">Submit</button>
+	    <button type="submit" class="btn btn-primary">Submit</button>
     </div>
+    <p>{{ message }} </p>
 </form>
 {% endblock %}

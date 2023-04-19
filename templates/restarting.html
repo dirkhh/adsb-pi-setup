@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Restarting the ADSB system {% endblock %}</h1>
+
+This may take a moment - you will be redirected when this has completed.
+Please be patient.
+
+<script>
+  var request = new XMLHttpRequest();
+  request.open('POST', '/restarting');
+  request.onload = function() {
+    if (request.status === 200 && request.responseText === 'done') {
+      // restarting the ADSB infra completed, redirect user
+      window.location = '/?success=1';
+    } else {
+      // ops, we got an error from the server
+      alert('Something went wrong.');
+    }
+  };
+  request.onerror = function() {
+    // ops, we got an error trying to talk to the server
+    alert('Something went wrong.');
+  };
+  request.send();
+</script>
+{% endblock %}
