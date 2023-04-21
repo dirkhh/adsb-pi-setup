@@ -33,7 +33,7 @@ def get_tz():
     brower_timezone = request.args.get("tz")
     print(f'get_tz called with {browser_timezone}')
     env_values = parse_env_files()
-    env_values['FEEDER_TZ'] = browser_timezone
+    env_values['TZ'] = browser_timezone
     return render_template('index.html', env_values=env_values)
 
 @app.route('/restarting', methods=('GET', 'POST'))
@@ -66,10 +66,10 @@ def setup():
             # write local config file
             with open(web_file, 'w') as env_file:
                 env_file.write('# adsb-pi feeder environment, written by the web config\n')
-                env_file.write(f"FEEDER_LAT={lat}\n")
-                env_file.write(f"FEEDER_LONG={lng}\n")
-                env_file.write(f"FEEDER_ALT_M={alt}\n")
-                env_file.write(f"FEEDER_TZ={form_timezone}\n")
+                env_file.write(f"LAT={lat}\n")
+                env_file.write(f"LONG={lng}\n")
+                env_file.write(f"ALT_M={alt}\n")
+                env_file.write(f"TZ={form_timezone}\n")
             return redirect('/restarting')
 
     return render_template('index.html', env_values=env_values, message=message)
