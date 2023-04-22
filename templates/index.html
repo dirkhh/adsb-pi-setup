@@ -18,7 +18,6 @@
                placeholder="Antenna longitude" class="form-control"
                value="{{ env_values['FEEDER_LONG'] }}"></input>
     </div>
-
     <div class="form-group">
         <label for="alt">Altitude above mean sealevel in meters</label>
         <input type="text" name="alt"
@@ -26,7 +25,6 @@
                placeholder="Antenna MSL altitude (in m)" class="form-control"
                value="{{ env_values['FEEDER_ALT_M'] }}"></input>
     </div>
-
     <div class="form-group">
         <label for="tz">Timzone</label>
         <button onclick="sendTimeToServer()">update timezone</button>
