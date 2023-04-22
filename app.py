@@ -8,6 +8,7 @@ system_file: str = "/opt/adsb/.env"
 web_file: str = "/opt/adsb/.web-setup.env"
 adv_file: str = "/opt/adsb/.adv-setup.env"
 
+
 def parse_env_files():
     _env_values = {}
     for env_file in [ system_file, web_file, adv_file ]:
@@ -22,7 +23,15 @@ def parse_env_files():
     if 'READSB_NET_CONNECTOR' not in _env_values: _env_values['READSB_NET_CONNECTOR'] = ''
     if 'MLAT_CONFIG' not in _env_values: _env_values['MLAT_CONFIG'] = ''
     if 'route' not in _env_values: _env_values['route'] = ''
+    if 'LAT' in env_values and float(env_values['LAT']) != 0.0 and \
+            'LONG' in evn_values and float(env_values['LONG']) != 0.0 and \
+            'ALT' in env_values and int(env_values['ALT']) != 0:
+        _env_values['adv_visible'] = 'visible'
+    else:
+        _env_values['adv_visible'] = 'invisible'
+
     return _env_values
+
 
 def restart():
     subprocess.call("/usr/bin/systemctl restart adsb-docker", shell=True)
