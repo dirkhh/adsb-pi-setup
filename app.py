@@ -23,9 +23,9 @@ def parse_env_files():
     if 'READSB_NET_CONNECTOR' not in _env_values: _env_values['READSB_NET_CONNECTOR'] = ''
     if 'MLAT_CONFIG' not in _env_values: _env_values['MLAT_CONFIG'] = ''
     if 'route' not in _env_values: _env_values['route'] = ''
-    if 'LAT' in env_values and float(env_values['LAT']) != 0.0 and \
-            'LONG' in evn_values and float(env_values['LONG']) != 0.0 and \
-            'ALT' in env_values and int(env_values['ALT']) != 0:
+    if 'READSB_LAT' in env_values and float(env_values['READSB_LAT']) != 0.0 and \
+            'READSB_LONG' in evn_values and float(env_values['READSB_LONG']) != 0.0 and \
+            'READSB_ALT' in env_values and int(env_values['READSB_ALT']) != 0:
         _env_values['adv_visible'] = 'visible'
     else:
         _env_values['adv_visible'] = 'invisible'
@@ -151,9 +151,9 @@ def setup():
             # write local config file
             with open(web_file, 'w') as env_file:
                 env_file.write('# adsb-pi feeder environment, written by the web config\n')
-                env_file.write(f"LAT={lat}\n")
-                env_file.write(f"LONG={lng}\n")
-                env_file.write(f"ALT_M={alt}\n")
+                env_file.write(f"READSB_LAT={lat}\n")
+                env_file.write(f"READSB_LONG={lng}\n")
+                env_file.write(f"READSB_ALT={alt}\n")
                 env_file.write(f"TZ={form_timezone}\n")
             return redirect('/restarting')
 
