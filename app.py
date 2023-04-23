@@ -23,9 +23,9 @@ def parse_env_files():
     if 'READSB_NET_CONNECTOR' not in _env_values: _env_values['READSB_NET_CONNECTOR'] = ''
     if 'MLAT_CONFIG' not in _env_values: _env_values['MLAT_CONFIG'] = ''
     if 'route' not in _env_values: _env_values['route'] = ''
-    if 'READSB_LAT' in env_values and float(env_values['READSB_LAT']) != 0.0 and \
-            'READSB_LONG' in evn_values and float(env_values['READSB_LONG']) != 0.0 and \
-            'READSB_ALT' in env_values and int(env_values['READSB_ALT']) != 0:
+    if 'READSB_LAT' in _env_values and float(_env_values['READSB_LAT']) != 0.0 and \
+            'READSB_LONG' in _env_values and float(_env_values['READSB_LONG']) != 0.0 and \
+            'READSB_ALT' in _env_values and int(_env_values['READSB_ALT']) != 0:
         _env_values['adv_visible'] = 'visible'
     else:
         _env_values['adv_visible'] = 'invisible'
