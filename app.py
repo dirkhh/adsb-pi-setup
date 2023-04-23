@@ -56,7 +56,7 @@ def restarting():
         restart()
         return "done"
     if request.method == 'GET':
-        return render_template('restarting.html')
+        return render_template('restarting.html', env_values=parse_env_files())
 
 @app.route('/advanced', methods=('GET', 'POST'))
 def advanced():
