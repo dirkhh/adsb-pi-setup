@@ -3,6 +3,12 @@
 {% block content %}
 <h1>{% block title %} Setup optional parameters {% endblock %}</h1>
 
+<p>
+<form method="post">
+<button type="submit" class="bigbigbutton" name="tar1090" value="go">I'm done here - take me to the website</button>
+</form>
+</p>
+<p>
 <form method="post">
     <div class="row">
         <input type="checkbox" style="height: 1.4em;" class="mb-3 col-sm-1" name="route" id="route" {{ env_values['route'] }}/>
@@ -25,4 +31,5 @@
     </div>
     <p>{{ message }} </p>
 </form>
+</p>
 {% endblock %}

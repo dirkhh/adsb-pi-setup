@@ -61,6 +61,11 @@ def restarting():
 @app.route('/advanced', methods=('GET', 'POST'))
 def advanced():
     if request.method == 'POST':
+        if request.form.get('tar1090') == "go":
+            host, port = request.server
+            tar1090 = request.url_root.replace(str(port), "8080")
+            return redirect(tar1090)
+
         # explicitly make these empty
         route = mlat = net = ''
         if request.form.get('route', True):
@@ -135,11 +140,9 @@ def setup():
     message = ''
     if request.args.get("success"):
         # the message most likely will never be seen, because we immediately
-        # redirect the user to the tar1090 website
+        # redirect the user to the advanced config
         message = "Restarting the ADSB app completed"
-        host, port = request.server
-        tar1090 = request.url_root.replace(str(port), "8080")
-        return redirect(tar1090)
+        return redirect("/advanced")
     env_values = parse_env_files()
     if request.method == 'POST':
         lat = request.form['lat']
