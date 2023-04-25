@@ -19,7 +19,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-            <li class="nav-item active {{ env_values['adv_visible'] }}">
+              <li class="nav-item active {{ 'visible' if metadata['adv_visible'] else 'invisible' }}">
                 <a class="nav-link" href="{{ url_for('advanced') }}">Optional Feature Setup</a>
             </li>
             </ul>
@@ -36,4 +36,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   </body>
 </html>
-
