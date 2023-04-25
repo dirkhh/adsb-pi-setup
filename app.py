@@ -1,25 +1,24 @@
+from typing import Dict
+
 from flask import Flask, render_template, request, redirect
 import subprocess
 from os import urandom, path
 import re
 
 
-system_file: str = "/opt/adsb/.env"
-web_file: str = "/opt/adsb/.web-setup.env"
-adv_file: str = "/opt/adsb/.adv-setup.env"
+env_file: str = ".env"
 
 
-def parse_env_files():
+def parse_env_file():
     _env_values = {}
-    for env_file in [system_file, web_file, adv_file]:
-        if not path.isfile(env_file):
-            continue
+    if path.isfile(env_file):
         with open(env_file) as f:
             for line in f:
                 if line.strip().startswith('#'):
                     continue
                 key, var = line.partition("=")[::2]
                 _env_values[key.strip()] = var.strip()
+    if 'TAR1090_USEROUTEAPI' not in _env_values: _env_values['TAR1090_USEROUTEAPI'] = ''
     if 'READSB_NET_CONNECTOR' not in _env_values: _env_values['READSB_NET_CONNECTOR'] = ''
     if 'MLAT_CONFIG' not in _env_values: _env_values['MLAT_CONFIG'] = ''
     if 'route' not in _env_values: _env_values['route'] = ''
@@ -33,7 +32,30 @@ def parse_env_files():
     return _env_values
 
 
+# read the .env file and update those mentioned in the Dict passed in (and add those entries that are new)
+def modify_env(values: Dict[str, str]):
+    if not path.isfile(env_file):
+        # that's not a good sign, but at least let's not throw an error
+        ef = open(env_file, 'w')
+        ef.close()
+    with open(env_file, 'r') as ef:
+        lines = ef.readlines()
+        for idx in range(len(lines)):
+            line = lines[idx]
+            for key in values.keys():
+                match = re.search(f"(^[^#]*{key}[^#]*=)[^#]*", line)
+                if match:
+                    lines[idx] = f"{match.group(1)} {values[key]}\n"
+                    values[key] = ''  # so we don't write it a second time at the end
+    for key in values:
+        if values[key]:
+            lines.append(f"{key} = {values[key]}")
+    with open(env_file, "w") as ef:
+        ef.writelines(lines)
+
+
 def restart():
+    # this really needs to check if we are still waiting for the previous restart
     subprocess.call("/usr/bin/systemctl restart adsb-docker", shell=True)
 
 
@@ -44,7 +66,7 @@ app.secret_key = urandom(16).hex()
 @app.route('/propagateTZ')
 def get_tz():
     browser_timezone = request.args.get("tz")
-    env_values = parse_env_files()
+    env_values = parse_env_file()
     env_values['TZ'] = browser_timezone
     return render_template('index.html', env_values=env_values)
 
@@ -55,7 +77,7 @@ def restarting():
         restart()
         return "done"
     if request.method == 'GET':
-        return render_template('restarting.html', env_values=parse_env_files())
+        return render_template('restarting.html', env_values=parse_env_file())
 
 
 @app.route('/advanced', methods=('GET', 'POST'))
@@ -67,35 +89,36 @@ def advanced():
             return redirect(tar1090)
 
         # explicitly make these empty
-        route = mlat = net = ''
-        if request.form.get('route', True):
+        route = 0
+        mlat = net = ''
+        if request.form.get('route'):
             route = '1'
-        if request.form.get('adsblol', True):
+        if request.form.get('adsblol'):
             if net: net += ';'
             if mlat: mlat += ';'
             net += 'in.adsb.lol,30004,beast_reduce_plus_out'
             mlat += 'in.adsb.lol,31090,39001'
-        if request.form.get('adsbone', False):
+        if request.form.get('adsbone'):
             if net: net += ';'
             if mlat: mlat += ';'
             net += 'feed.adsb.one,64004,beast_reduce_plus_out'
             mlat += 'feed.adsb.one,64006,39002'
-        if request.form.get('adsbfi', False):
+        if request.form.get('adsbfi'):
             if net: net += ';'
             if mlat: mlat += ';'
             net += 'feed.adsb.fi,30004,beast_reduce_plus_out'
             mlat += 'feed.adsb.fi,31090,39000'
-        if request.form.get('adsbx', False):
+        if request.form.get('adsbx'):
             if net: net += ';'
             if mlat: mlat += ';'
             net += 'feed1.adsbexchange.com,30004,beast_reduce_plus_out'
             mlat += 'feed.adsbexchange.com,31090,39005'
-        if request.form.get('tat', True):
+        if request.form.get('tat'):
             if net: net += ';'
             if mlat: mlat += ';'
             net += 'feed.theairtraffic.com,30004,beast_reduce_plus_out'
             mlat += 'feed.theairtraffic.com,31090,39004'
-        if request.form.get('ps', True):
+        if request.form.get('ps'):
             if net: net += ';'
             if mlat: mlat += ';'
             net += 'feed.planespotters.net,30004,beast_reduce_plus_out'
@@ -104,28 +127,12 @@ def advanced():
             net = 'in.adsb.lol,30004,beast_reduce_plus_out'
             mlat = 'in.adsb.lol,31090,39001'
 
-        updated = []
-        with open(adv_file, 'r') as afile:
-            for line in afile:
-                match = re.search('^[^#]*TAR1090_USEROUTEAPI[ \t]*=', line)
-                if match:
-                    continue
-                match = re.search('^[^#]*READSB_NET_CONNECTOR[ \t]*=', line)
-                if match:
-                    continue
-                match = re.search('^[^#]*MLAT_CONFIG[ \t]*=', line)
-                if match:
-                    continue
-                updated.append(line)
-        updated.append(f"TAR1090_USEROUTEAPI = {route}")
-        updated.append(f"READSB_NET_CONNECTOR = {net}")
-        updated.append(f"MLAT_CONFIG = {mlat}")
-        with open(adv_file, 'w') as env_file:
-            for line in updated:
-                env_file.write(f"{line}\n")
+        modify_env({'TAR1090_USEROUTEAPI': route,
+                    'READSB_NET_CONNECTOR': net,
+                    'MLAT_CONFIG': mlat})
         return redirect('/restarting')
-    env_values = parse_env_files()
-    env_values['route'] = 'checked' if env_values['TAR1090_USEROUTEAPI'] != '' else ''
+    env_values = parse_env_file()
+    env_values['route'] = 'checked' if env_values['TAR1090_USEROUTEAPI'] == '1' else ''
     env_values['adsblol'] = 'checked' if 'adsb.lol' in env_values['READSB_NET_CONNECTOR'] else ''
     env_values['adsbone'] = 'checked' if 'adsb.one' in env_values['READSB_NET_CONNECTOR'] else ''
     env_values['adsbfi'] = 'checked' if 'adsb.fi' in env_values['READSB_NET_CONNECTOR'] else ''
@@ -140,7 +147,7 @@ def setup():
     message = ''
     if request.args.get("success"):
         return redirect("/advanced")
-    env_values = parse_env_files()
+    env_values = parse_env_file()
     if request.method == 'POST':
         lat = request.form['lat']
         lng = request.form['lng']
@@ -149,12 +156,10 @@ def setup():
 
         if lat and lng and alt and form_timezone:
             # write local config file
-            with open(web_file, 'w') as env_file:
-                env_file.write('# adsb-pi feeder environment, written by the web config\n')
-                env_file.write(f"READSB_LAT={lat}\n")
-                env_file.write(f"READSB_LONG={lng}\n")
-                env_file.write(f"READSB_ALT={alt}\n")
-                env_file.write(f"TZ={form_timezone}\n")
+            modify_env({'READSB_LAT': lat,
+                        'READSB_LONG': lng,
+                        'READSB_ALT': alt,
+                        'TZ': form_timezone})
             return redirect('/restarting')
 
     return render_template('index.html', env_values=env_values, message=message)
