@@ -18,13 +18,13 @@ def parse_env_file():
                     continue
                 key, var = line.partition("=")[::2]
                 _env_values[key.strip()] = var.strip()
-    if 'TAR1090_USEROUTEAPI' not in _env_values: _env_values['TAR1090_USEROUTEAPI'] = ''
-    if 'READSB_NET_CONNECTOR' not in _env_values: _env_values['READSB_NET_CONNECTOR'] = ''
-    if 'MLAT_CONFIG' not in _env_values: _env_values['MLAT_CONFIG'] = ''
+    if 'FEEDER_TAR1090_USEROUTEAPI' not in _env_values: _env_values['FEEDER_TAR1090_USEROUTEAPI'] = ''
+    if 'FEEDER_READSB_NET_CONNECTOR' not in _env_values: _env_values['FEEDER_READSB_NET_CONNECTOR'] = ''
+    if 'FEEDER_MLAT_CONFIG' not in _env_values: _env_values['FEEDER_MLAT_CONFIG'] = ''
     if 'route' not in _env_values: _env_values['route'] = ''
-    if 'READSB_LAT' in _env_values and float(_env_values['READSB_LAT']) != 0.0 and \
-            'READSB_LONG' in _env_values and float(_env_values['READSB_LONG']) != 0.0 and \
-            'READSB_ALT' in _env_values and int(_env_values['READSB_ALT']) != 0:
+    if 'FEEDER_LAT' in _env_values and float(_env_values['FEEDER_LAT']) != 0.0 and \
+            'FEEDER_LONG' in _env_values and float(_env_values['FEEDER_LONG']) != 0.0 and \
+            'FEEDER_ALT' in _env_values and int(_env_values['FEEDER_ALT']) != 0:
         _env_values['adv_visible'] = 'visible'
     else:
         _env_values['adv_visible'] = 'invisible'
@@ -67,7 +67,7 @@ app.secret_key = urandom(16).hex()
 def get_tz():
     browser_timezone = request.args.get("tz")
     env_values = parse_env_file()
-    env_values['TZ'] = browser_timezone
+    env_values['FEEDER_TZ'] = browser_timezone
     return render_template('index.html', env_values=env_values)
 
 
@@ -127,18 +127,18 @@ def advanced():
             net = 'in.adsb.lol,30004,beast_reduce_plus_out'
             mlat = 'in.adsb.lol,31090,39001'
 
-        modify_env({'TAR1090_USEROUTEAPI': route,
-                    'READSB_NET_CONNECTOR': net,
-                    'MLAT_CONFIG': mlat})
+        modify_env({'FEEDER_TAR1090_USEROUTEAPI': route,
+                    'FEEDER_READSB_NET_CONNECTOR': net,
+                    'FEEDER_MLAT_CONFIG': mlat})
         return redirect('/restarting')
     env_values = parse_env_file()
-    env_values['route'] = 'checked' if env_values['TAR1090_USEROUTEAPI'] == '1' else ''
-    env_values['adsblol'] = 'checked' if 'adsb.lol' in env_values['READSB_NET_CONNECTOR'] else ''
-    env_values['adsbone'] = 'checked' if 'adsb.one' in env_values['READSB_NET_CONNECTOR'] else ''
-    env_values['adsbfi'] = 'checked' if 'adsb.fi' in env_values['READSB_NET_CONNECTOR'] else ''
-    env_values['adsbx'] = 'checked' if 'adsbexchange' in env_values['READSB_NET_CONNECTOR'] else ''
-    env_values['tat'] = 'checked' if 'theairtraffic' in env_values['READSB_NET_CONNECTOR'] else ''
-    env_values['ps'] = 'checked' if 'planespotters' in env_values['READSB_NET_CONNECTOR'] else ''
+    env_values['route'] = 'checked' if env_values['FEEDER_TAR1090_USEROUTEAPI'] == '1' else ''
+    env_values['adsblol'] = 'checked' if 'adsb.lol' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
+    env_values['adsbone'] = 'checked' if 'adsb.one' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
+    env_values['adsbfi'] = 'checked' if 'adsb.fi' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
+    env_values['adsbx'] = 'checked' if 'adsbexchange' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
+    env_values['tat'] = 'checked' if 'theairtraffic' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
+    env_values['ps'] = 'checked' if 'planespotters' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
     return render_template('advanced.html', env_values=env_values)
             
 
@@ -156,10 +156,10 @@ def setup():
 
         if lat and lng and alt and form_timezone:
             # write local config file
-            modify_env({'READSB_LAT': lat,
-                        'READSB_LONG': lng,
-                        'READSB_ALT': alt,
-                        'TZ': form_timezone})
+            modify_env({'FEEDER_LAT': lat,
+                        'FEEDER_LONG': lng,
+                        'FEEDER_ALT': alt,
+                        'FEEDER_TZ': form_timezone})
             return redirect('/restarting')
 
     return render_template('index.html', env_values=env_values, message=message)
