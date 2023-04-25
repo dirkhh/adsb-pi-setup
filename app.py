@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Flask, render_template, request, redirect
 import subprocess
-from os import urandom,path
+from os import urandom, path
 import re
 
 
@@ -11,7 +11,7 @@ adv_file: str = "/opt/adsb/.adv-setup.env"
 
 def parse_env_files():
     _env_values = {}
-    for env_file in [ system_file, web_file, adv_file ]:
+    for env_file in [system_file, web_file, adv_file]:
         if not path.isfile(env_file):
             continue
         with open(env_file) as f:
@@ -37,18 +37,17 @@ def restart():
     subprocess.call("/usr/bin/systemctl restart adsb-docker", shell=True)
 
 
-browser_timezone: str = 'Europe/Berlin'
-
 app = Flask(__name__)
 app.secret_key = urandom(16).hex()
 
+
 @app.route('/propagateTZ')
 def get_tz():
-    brower_timezone = request.args.get("tz")
-    print(f'get_tz called with {browser_timezone}')
+    browser_timezone = request.args.get("tz")
     env_values = parse_env_files()
     env_values['TZ'] = browser_timezone
     return render_template('index.html', env_values=env_values)
+
 
 @app.route('/restarting', methods=('GET', 'POST'))
 def restarting():
@@ -57,6 +56,7 @@ def restarting():
         return "done"
     if request.method == 'GET':
         return render_template('restarting.html', env_values=parse_env_files())
+
 
 @app.route('/advanced', methods=('GET', 'POST'))
 def advanced():
@@ -139,9 +139,6 @@ def advanced():
 def setup():
     message = ''
     if request.args.get("success"):
-        # the message most likely will never be seen, because we immediately
-        # redirect the user to the advanced config
-        message = "Restarting the ADSB app completed"
         return redirect("/advanced")
     env_values = parse_env_files()
     if request.method == 'POST':
