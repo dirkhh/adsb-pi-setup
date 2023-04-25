@@ -6,7 +6,7 @@ from os import urandom, path
 import re
 
 
-env_file: str = ".env"
+env_file: str = "/opt/adsb/.env"
 
 
 def parse_env_file():
@@ -48,7 +48,7 @@ def modify_env(values: Dict[str, str]):
                     values[key] = ''  # so we don't write it a second time at the end
     for key in values:
         if values[key]:
-            lines.append(f"{key} = {values[key]}")
+            lines.append(f"{key} = {values[key]}\n")
     with open(env_file, "w") as ef:
         ef.writelines(lines)
 
