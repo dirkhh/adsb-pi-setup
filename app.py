@@ -19,8 +19,7 @@ def parse_env_file():
                 key, var = line.partition("=")[::2]
                 _env_values[key.strip()] = var.strip()
     if 'FEEDER_TAR1090_USEROUTEAPI' not in _env_values: _env_values['FEEDER_TAR1090_USEROUTEAPI'] = ''
-    if 'FEEDER_READSB_NET_CONNECTOR' not in _env_values: _env_values['FEEDER_READSB_NET_CONNECTOR'] = ''
-    if 'FEEDER_MLAT_CONFIG' not in _env_values: _env_values['FEEDER_MLAT_CONFIG'] = ''
+    if 'FEEDER_ULTRAFEEDER_CONFIG' not in _env_values: _env_values['FEEDER_ULTRAFEEDER_CONFIG'] = ''
     if 'route' not in _env_values: _env_values['route'] = ''
     if 'FEEDER_LAT' in _env_values and float(_env_values['FEEDER_LAT']) != 0.0 and \
             'FEEDER_LONG' in _env_values and float(_env_values['FEEDER_LONG']) != 0.0 and \
@@ -90,55 +89,41 @@ def advanced():
 
         # explicitly make these empty
         route = 0
-        mlat = net = ''
+        net = ''
         if request.form.get('route'):
             route = '1'
         if request.form.get('adsblol'):
             if net: net += ';'
-            if mlat: mlat += ';'
-            net += 'in.adsb.lol,30004,beast_reduce_plus_out'
-            mlat += 'in.adsb.lol,31090,39001'
+            net += 'adsb,in.adsb.lol,30004,beast_reduce_plus_out;mlat,in.adsb.lol,31090,39001'
         if request.form.get('adsbone'):
             if net: net += ';'
-            if mlat: mlat += ';'
-            net += 'feed.adsb.one,64004,beast_reduce_plus_out'
-            mlat += 'feed.adsb.one,64006,39002'
+            net += 'adsb,feed.adsb.one,64004,beast_reduce_plus_out;mlat,feed.adsb.one,64006,39002'
         if request.form.get('adsbfi'):
             if net: net += ';'
-            if mlat: mlat += ';'
-            net += 'feed.adsb.fi,30004,beast_reduce_plus_out'
-            mlat += 'feed.adsb.fi,31090,39000'
+            net += 'adsb,feed.adsb.fi,30004,beast_reduce_plus_out;mlat,feed.adsb.fi,31090,39000'
         if request.form.get('adsbx'):
             if net: net += ';'
-            if mlat: mlat += ';'
-            net += 'feed1.adsbexchange.com,30004,beast_reduce_plus_out'
-            mlat += 'feed.adsbexchange.com,31090,39005'
+            net += 'adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out;mlat,feed.adsbexchange.com,31090,39005'
         if request.form.get('tat'):
             if net: net += ';'
-            if mlat: mlat += ';'
-            net += 'feed.theairtraffic.com,30004,beast_reduce_plus_out'
-            mlat += 'feed.theairtraffic.com,31090,39004'
+            net += 'adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out;mlat,feed.theairtraffic.com,31090,39004'
         if request.form.get('ps'):
             if net: net += ';'
-            if mlat: mlat += ';'
-            net += 'feed.planespotters.net,30004,beast_reduce_plus_out'
-            mlat += 'mlat.planespotters.net,31090,39003'
-        if mlat == '':   # things fail if those variables are empty
-            net = 'in.adsb.lol,30004,beast_reduce_plus_out'
-            mlat = 'in.adsb.lol,31090,39001'
+            net += 'adsb,feed.planespotters.net,30004,beast_reduce_plus_out;mlat,mlat.planespotters.net,31090,39003'
+        if net == '':   # things fail if this variable is empty
+            net = 'adsb,in.adsb.lol,30004,beast_reduce_plus_out;mlat,in.adsb.lol,31090,39001'
 
         modify_env({'FEEDER_TAR1090_USEROUTEAPI': route,
-                    'FEEDER_READSB_NET_CONNECTOR': net,
-                    'FEEDER_MLAT_CONFIG': mlat})
+                    'FEEDER_ULTRAFEEDER_CONFIG': net})
         return redirect('/restarting')
     env_values = parse_env_file()
     env_values['route'] = 'checked' if env_values['FEEDER_TAR1090_USEROUTEAPI'] == '1' else ''
-    env_values['adsblol'] = 'checked' if 'adsb.lol' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
-    env_values['adsbone'] = 'checked' if 'adsb.one' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
-    env_values['adsbfi'] = 'checked' if 'adsb.fi' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
-    env_values['adsbx'] = 'checked' if 'adsbexchange' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
-    env_values['tat'] = 'checked' if 'theairtraffic' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
-    env_values['ps'] = 'checked' if 'planespotters' in env_values['FEEDER_READSB_NET_CONNECTOR'] else ''
+    env_values['adsblol'] = 'checked' if 'adsb.lol' in env_values['FEEDER_ULTRAFEEDER_CONFIG'] else ''
+    env_values['adsbone'] = 'checked' if 'adsb.one' in env_values['FEEDER_ULTRAFEEDER_CONFIG'] else ''
+    env_values['adsbfi'] = 'checked' if 'adsb.fi' in env_values['FEEDER_ULTRAFEEDER_CONFIG'] else ''
+    env_values['adsbx'] = 'checked' if 'adsbexchange' in env_values['FEEDER_ULTRAFEEDER_CONFIG'] else ''
+    env_values['tat'] = 'checked' if 'theairtraffic' in env_values['FEEDER_ULTRAFEEDER_CONFIG'] else ''
+    env_values['ps'] = 'checked' if 'planespotters' in env_values['FEEDER_ULTRAFEEDER_CONFIG'] else ''
     return render_template('advanced.html', env_values=env_values)
             
 
