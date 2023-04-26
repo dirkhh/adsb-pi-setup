@@ -63,11 +63,11 @@ class NetConfigs:
                 "adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out",
                 "mlat,feed.adsbexchange.com,31090,39005",
             ),
-            "theairtraffic": NetConfig(
+            "tat": NetConfig(
                 "adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out",
                 "mlat,feed.theairtraffic.com,31090,39004",
             ),
-            "planespotters": NetConfig(
+            "ps": NetConfig(
                 "adsb,feed.planespotters.net,30004,beast_reduce_plus_out",
                 "mlat,mlat.planespotters.net,31090,39003",
             ),
